@@ -1,0 +1,219 @@
+username: m001-student
+password: m001-mongodb-basics
+
+
+
+1. 连接mongodb
+    mongo "mongodb+srv://sandbox.s9pcx.mongodb.net/Sandbox" --username m001-student
+    
+    
+    mongodb的结构：集群-databases-collections-documents
+    一个collection的格式可以是：<database>：<collection>. 
+    对应sql：集群-数据库-表-数据
+    
+2. 写入读取数据
+    Json：
+        {}开头结尾
+        ：分开键值
+        key:value结构之间用，分开
+        keys必须用""包裹
+    example:
+        
+        {
+          "id":"12-231-EF",
+          "certificate_number":123,
+          “business_name:"FEF",
+          "address":{
+              "city":"melb",
+              "zip":1111,
+              "street":"Maffchard St",
+              "number":123
+              }
+        }
+3. Json 的缺点：
+
+  读取字符很慢
+  内存开销大
+  支持的数据类型有限
+    
+4. Mongodb使用的的是：
+   
+   Bson：二进制json文件
+   速度高
+   占用内存小
+   自由度高
+   更多的数据类型，如日期，二进制数据，字符，布尔，数字（integer，long，float），列表
+   只有机器能读
+
+5. 基础读写：
+    
+    5.1.0 读取Bson数据
+      mongodump --uri "<Atlas Cluster URI>"
+    
+    5.1.1 URI: Uniform Resource Identifier
+    5.1.2 srv 建立一个安全的连接
+    5.1.3 例子：
+          mongodb+src://user:password@clusterURI.mongodb.net/database (用户名：密码@集群URI/数据库名称)
+          
+            
+ 
+    
+    5.2.0 读取json数据
+      
+          mongoexport --uri "<Atlas Cluster URI>"
+                      --collection=<collection name>
+                      --out=<filename>.json
+                      
+                      
+    5.3.0 写入Bson数据
+          
+          mongorestore --uri "<Atlas Cluster URI>"
+                       --drop dump
+    5.3.1 --drop dump：dump是一个collection，drop命令在这里使用的作用是，将已经存在于数据库中的dump（collection）删除并写入新的dump
+    5.3.2 如果没有这个--drop命令，altas会返回警告deplicate entries in the database如果线上的数据库的数据和新写入的一样
+           
+    5.4.0 写入Json数据
+    
+          mongoimport --uri "<Atlas Cluster URI>"
+                      --drop=sales.json
+                      --collection sales
+                      
+    5.4.1 最后一个--collection目的是为了指明collection的名字，提高效率
+
+
+
+6. query
+
+    6.1.0
+        mongodb+srv://user:password@clusterURI.mongodb.net
+        如果写的是admin的话不会进入任何一个database
+        
+    6.1.1
+        show dbs
+        
+    6.1.2
+        
+        use sample_trainning
+        
+        切换到这个数据库
+    6.1.3
+    
+        show collections
+        
+        展示这个数据库下的collections（表）
+        
+        
+    6.1.4 
+      
+        db.zips.find({"state":"NY"})
+        
+        格式：db.<collection_name>.find({query})         
+        
+        在shell上，只会显示前20个数据
+        
+        如果要继续显示更多数据，则需要输入it命令，指的是iteration，通过cursor和pointer得到结果
+        
+        cursor得到query的结果，pointer指向具体的内存地址
+        
+        -------------
+        db.trips.find({"birth year":1961,"start station name":"Howard St & Centre St"}).pretty()
+        db.trips.find({"gender":{$eq:1}}).pretty()
+        
+        -------------
+        
+   6.1.5
+        
+        db.<collection_name>.find(<query>).count()
+        
+        count这里是一种aggregation方法
+        
+        --------------
+        db.inspections.find({"date":"Feb 20 2015"}).count()
+        ---------------
+        
+        
+   6.1.6
+   
+        
+        
+   6.1.7
+   
+        db.zips.find({"state":"NY"，"city":"ALBANY"})
+        
+        
+        
+   6.1.8
+   
+        db.zips.find({"state":"NY"，"city":"ALBANY"}).pretty()
+        
+        
+        pretty() 让输出更好看
+        
+  
+          
+  
+  find() command
+
+1. Query the zips collection from the sample_training database to find all
+   documents where the state is New York.
+  
+  ----------
+  use sample_training
+  db.zips.find({"state":"NY"})
+  ----------
+   
+2. Iterate through the query results.
+
+  ----------
+  it
+  ----------
+
+3. Find out how many ZIP codes there are in NY state.
+
+  ----------
+  db.zips.find({"state":"NY"}).count()
+  db.zips.distinct("zip",{"state":"NY"})
+  ----------
+  
+4. What about the ZIP codes that are in NY but also in the city of Albany?
+
+  ----------
+  db.zips.find({"state":"NY","city":"ALBANY"})
+  ----------
+5. Make the cursor look more readable.
+   pretty()
+
+
+
+
+        
+    
+     
+     
+     
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
