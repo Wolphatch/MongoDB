@@ -1,0 +1,119 @@
+1. 不以行和列来储存数据
+
+2. 非关系型数据库
+
+3. 数据以document储存
+
+4. document以collection的形式储存
+
+5. Document以field-value的形式储存数据
+  {
+    <Field>:<value>,
+    "age":26.
+    "name":"Zac
+  }
+
+
+6. collections 是很多个5组成的
+
+7. 数据库由很多collection组成
+
+8. 在document中，同level下，field是unique的，不可以有相同的field
+
+9. Altas使用mongodb作为数据存储和读取的核心
+
+10. Altas是一种：
+      分布式的数据存储服务器
+      
+11.  Replica set：
+
+      mongodb的主服务为mongod，作为一种分布式的服务器，mongodb使用Replica set的模式。 即一个Primary的mongod实例和多个secondary的 mongod实例。
+      
+      一个replica set只有一个主node，主node接受所有写入服务（在某些例外情况下，secondary node会暂时的充当主node）
+      
+      主node会在log中记录所有数据库的变化(operation log)
+      
+12. Secondary node:
+
+      副节点复制主节点的operation log并且操作其数据。
+      
+      如果主节点不可用，副节点会暂时充当主节点。在有多副节点的情况下，会通过选举（election）选一个副节点作为主节点
+      
+      副节点的数据和主节点一样
+      
+13. 当由于类似成本限制的原因无法增加副节点的时候：
+      
+      由于成本限制我们无法增加一个mongod instance（一个新的副节点），那我们可以增加一个Arbiter节点，即只充当投票但并不储存数据的节点。
+      Arbiter节点不可充当主节点
+      
+14. 为什么需要Arbiter？
+      
+      当主节点宕机的时候（会触发 automatic failover process），副节点会通过投票选择一个新的主节点
+      
+      当投票没有完成的时候，数据库是不可以写入的。
+      
+      一般选举的中位数时间为12秒， 包含disable宕机的主节点及投票。 这个时间可以通过settings.electionTimeoutMillis设置
+      
+15. Heartbeats：
+    每一个在replica set里的节点每两秒向其他节点输送pings。如果十秒内没收到回复，不回复的节点会被标记为不可访问
+    
+16. 成员优先
+    
+    在14中，主机宕机副节点会投票，但是哪个副节点发起投票？
+    在有一个稳定的主节点时，选举算法会制造一个best-effort机制去找到一个有最高优先度的副节点。 这个副节点会在主节点宕机的时候触发failover，并且更可能得到主节点的位置。
+      
+17 Mirrored Reads
+   
+   在mongod 4，4中，一个新的机制是，主节点会拷贝一份最近对主节点的操作请求的log（subset of operations）给可以被选为主节点的副节点，存在副节点的cache中
+   这样提高了主节点宕机后，选出新的主节点并恢复服务的效率
+      
+18 voting members
+
+    mongodb使用members[n].votes来控制选举时谁可以选举
+    每一个在replica set的成员都有这个参数，参数为1才可以选举
+    参数为0的时候，其成员优先度（见16）必定为0
+    成员优先度不为0，则参数必不为0
+    可以投票的成员有：
+      PRIMARY
+      SECONDARY
+      STARTUP2
+      RECOVERING
+      ARBITER
+      ROLLBACK
+      
+      
+19. Asynchronous Replication
+    异步复制：副节点通过拷贝主节点的operation log来异步的操作数据（主副节点数据一样）
+      
+20. 复制延迟和流控制
+      复制滞后是指将主磁盘上的写操作复制（即复制）到辅助磁盘上所花费的时间 。可以接受一些小的延迟时间，但是随着复制滞后的增加会出现严重的问题，包括在主数据库上增加缓存压力。
+
+      从MongoDB 4.2开始，管理员可以限制主数据库应用其写入的速率，以将延迟保持在可配置的最大值以下。majority committedflowControlTargetLagSeconds      
+
+21. 读取首选项
+      默认情况下，客户端从主服务器读取；但是，客户端可以指定读取首选项，以将读取操作发送到副节点
+
+      异步复制到辅助数据库意味着从辅助数据库读取数据可能会返回不反映主数据库上数据状态的数据。（即主数据库的oplog还没有发送到副节点，或副节点还没有来得及根据oplog更新数据）
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
