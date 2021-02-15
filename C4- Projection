@@ -1,0 +1,147 @@
+mongo "mongodb+srv://sandbox.s9pcx.mongodb.net/Sandbox" --username m001-student
+m001-mongodb-basics
+
+
+
+1. Projection, 在find的第二个{}中写，格式为{"field1":1,field2:1}。 其中1指的是显示。 project把要打印的field打印出来，不需要的不要。类似于select。 0表示除了这个都要。 1和0 不能搭配使用
+  除了不显示_id
+  
+
+
+db.listingsAndReviews.find(
+	{
+		"amenities":
+			{
+				$size: 20,
+				$all: [ "Internet", "Wifi",  "Kitchen", "Heating",
+                                 "Family/kid friendly", "Washer", "Dryer",
+                                 "Essentials", "Shampoo", "Hangers",
+                                 "Hair dryer", "Iron",
+                                 "Laptop friendly workspace" ]
+			}
+	},
+	{
+		"price":1,
+		"address":1
+	}
+).pretty()
+
+
+
+2. 几个sort
+  
+  2.1 sort函数，类似于orderby
+  
+  
+                        db.listingsAndReviews.find(
+                      {
+                        "amenities":
+                          {
+                            $size: 20,
+                            $all: [ "Internet", "Wifi",  "Kitchen", "Heating",
+                                                     "Family/kid friendly", "Washer", "Dryer",
+                                                     "Essentials", "Shampoo", "Hangers",
+                                                     "Hair dryer", "Iron",
+                                                     "Laptop friendly workspace" ]
+
+                          }
+                      },
+                      {
+                        "price":1,
+                        "address":1
+                      }
+                    ).sort({"price":1}).pretty()
+
+
+
+
+  2.2 $sort， array operator下的 辅助
+  
+  
+                      db.students.update(
+                       { _id: 5 },
+                       {
+                         $push: {
+                           quizzes: {
+                              $each: [ { wk: 5, score: 8 }, { wk: 6, score: 7 }, { wk: 7, score: 6 } ],
+                              $sort: { score: -1 },
+                              $slice: 3
+                           }
+                         }
+                       }
+                    )
+                    
+                    
+3. sub-document
+
+
+    db.grades.find(
+    { "class_id":431},
+    {
+      "scores":{
+        $elemMatch:{"score":{$gt:80}}
+      }
+    }
+  ).pretty()
+                    
+       
+       
+  
+  
+  
+    db.grades.find(
+
+    {
+      "scores":{
+        $elemMatch:{
+          $and:[
+
+            {"score":{$gt:60}},
+            {"type":{$eq:"exam"}}
+          ]
+        }
+      }
+    }
+
+  ).pretty()
+  
+  
+  
+  
+4. How many companies in the sample_training.companies collection have offices in the city of Seattle?
+  
+  
+    
+          db.companies.find({"offices":
+
+        {
+          $elemMatch:{
+            "city":"Seattle"
+          }
+        }
+
+      },{"offices":1}).pretty().count()
+      
+      
+      
+ 5. 寻找sub-ducument coule be very easy, 0 in "relationships.0" means the 0 position in a array
+ 
+ 
+              db.companies.find(
+
+          {
+            "relationships.0.person.last_name":"Zuckerberg"
+
+          },
+          {
+            "name":1
+          }
+          
+          
+ 6. $regrex 代表寻找正则表达式， 这里
+ 6. $regrex 代表寻找正则表达式
+ 6. $regrex 代表寻找
+
+                    
+                    
+                    
