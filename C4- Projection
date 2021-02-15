@@ -109,7 +109,7 @@ db.listingsAndReviews.find(
   
   
 4. How many companies in the sample_training.companies collection have offices in the city of Seattle?
-  
+  	elemMatch一定要用在列表一层
   
     
           db.companies.find({"offices":
@@ -138,10 +138,37 @@ db.listingsAndReviews.find(
           }
           
           
- 6. $regrex 代表寻找正则表达式， 这里
  6. $regrex 代表寻找正则表达式
- 6. $regrex 代表寻找
+ 
+ 	{ name: { $regex: /acme.*corp/i, $nin: [ 'acmeblahcorp' ] } }
+	{ name: { $regex: /acme.*corp/, $options: 'i', $nin: [ 'acmeblahcorp' ] } }
+	{ name: { $regex: 'acme.*corp', $options: 'i', $nin: [ 'acmeblahcorp' ] } }
+	
+	
+	
+	{ <field>: { $regex: /pattern/, $options: '<options>' } }
+	{ <field>: { $regex: 'pattern', $options: '<options>' } }
+	{ <field>: { $regex: /pattern/<options> } }
+	
+	
+	#开头结尾，^$
+	https://mongoing.com/archives/docs/mongodb%E5%88%9D%E5%AD%A6%E8%80%85%E6%95%99%E7%A8%8B/mongodb%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%EF%BC%88regex%EF%BC%89
+	
+	# options
+	https://www.jianshu.com/p/b5f9da31dbd9
+	
+	i	忽略大小写情况	无	
+	m	多行匹配模式，当有锚点^和$，且文档为多行时，分行进行开头结尾匹配，而不是对字符串开头结尾进行匹配。	无	
+	x	忽略非转义的空白字符	$regex和$options不能省略	
+	s	点号(.)元字符会匹配所有字符，包括换行符(\n)	$regex和$options不能省略	
 
-                    
+
+	#正则表达使用prec
+	https://www.debuggex.com/cheatsheet/regex/pcre
+	
+	
+	
+	
+
                     
                     
