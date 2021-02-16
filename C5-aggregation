@@ -40,8 +40,71 @@
       db.listingsAndReviews.aggregate([
                                   { "$project": { "address": 1, "_id": 0 }},
                                   { "$group": { "_id": "$address.country",   //这类的“_id”是我们给输出的document自定的_id
-                                                "count": { "$sum": 1 } } }   //“count”是自定的field name
+                                                "count": { "$sum": 1 } } }   //“count”是自定的field name, $sum是agg函数
                                 ])
+                                
+                                
+                                
+                                
+5. 对listingsAndReviews 里的amenities字段进行统计，统计每个设施各在数据库中出现了多少次
+
+    db.listingsAndReviews.aggregate({$project:{"amenities":1,"_id":0}},  //将amenities取出
+                                    {$unwind:"$amenities"},    //将数组拆开，类似于从amenities:[a,b,c],amenities:[c,d,e]变成amenities:a,amenities:...
+                                    {$group:{"_id":"$amenities","count":{$sum:1}}}).pretty() //将上一层拆分后的document通过聚合函数计数
+                                    
+6. 对listingsAndReviews 里的amenities字段进行统计，统计每个设施各在数据库中出现了多少次，输出最多的三个词
+        
+        db.listingsAndReviews.aggregate([{$project:{"amenities":1,"_id":0}},
+                                         {$unwind:"$amenities"},
+                                         {$group:{"_id":"$amenities","count":{$sum:1}}},
+                                         {$sort:{"count":-1}},          //这里的count是field， 不是变量，格式为 { $sort: { <field1>: <sort order>, <field2>: <sort order> ... } }
+                                         {$limit:3}])
+    
+ 7. db.companies.find({ "founded_year": { "$ne": null }},
+                  { "name": 1, "founded_year": 1 }
+                 ).limit(5).sort({ "founded_year": 1 })
+                 
+    While the limit() and sort() methods are not listed in the correct order, 
+    MongoDB flips their order when executing the query, delivering the results that the question prompt is looking for.
+    
+8. 
+
+    db.trips.find({"birth year":{$ne:""}},{"birth year":1}).sort({"birth year": -1})  //注意不是null而是“”
+    
+    
+9.  createIndex
+
+    创建索引，以便减少搜索的成本（也就是建立一个临时表）
+    https://www.docs4dev.com/docs/zh/mongodb/v3.6/reference/reference-method-db.collection.createIndex.html
+    
+    
+10. data modelling
+
+    db.collections.updateOne({locate},{update},{"upsert":true})
+    
+    upsert指的是update，要是没有就insert
+    
+    
+            db.students.update(
+           { _id: 5 },
+           {
+             $push: {
+               quizzes: {
+                  $each: [ { wk: 5, score: 8 }, { wk: 6, score: 7 }, { wk: 7, score: 6 } ],
+                  $sort: { score: -1 },   //push里面可以有很多选项sort，inc等等
+                  $slice: 3
+               }
+             }
+           }
+        )
+        
+        
+        db.iot.updateOne({ "sensor": r.sensor, "date": r.date,
+                   "valcount": { "$lt": 48 } },
+                         { "$push": { "readings": { "v": r.value, "t": r.time } },
+                        "$inc": { "valcount": 1, "total": r.value } },
+                 { "upsert": true })   //如果没有readings，就增加一个field（因为push），如果没有valcount或者total，就加一个（$inc）
+
                                                     
 
 
