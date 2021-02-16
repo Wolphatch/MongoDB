@@ -1,0 +1,48 @@
+
+
+
+1. Find all documents that have Wifi as one of the amenities. Only include price and address in the resulting cursor.
+
+    db.listingsAndViews.find({"amenities":{$all:["Wifi"]}},{"price":1,"address":1}) 
+    db.listingsAndReviews.find({"amenities":"Wifi"},{"price":1,"address":1,"_id":0})
+    
+    
+    
+2. 相同的问题用aggregation
+
+  agg syntex: db.collection.aggregate( [ { <stage> }, ... ] )
+
+  
+  db.listingsAndReviews.aggregate([{$match:{"amenities":"Wifi"}},{$project:{"price":1,"address":1,"_id":0}}])
+
+  
+  
+  $match: as a filter
+  $project: like select
+  https://juejin.cn/post/6844903903000002574
+  
+  
+3.   
+  Project only the address field value for each document, then group all documents into one document per address.country value.
+  
+    db.listingsAndReviews.aggregate([{$project:{"address":1}},{$group:{"_id":"address.country"}}])
+    这里别忘了"_id"，因为输出的是documents，每个document都要有一个不一样的_id 
+    
+    这个似于，一个没有agg函数的groupby
+    
+4. Project only the address field value for each document, then group all documents into one document per address.country value, and count one for each document in each group.
+
+      $group:{
+            "_id":<expression>, //groupby expression
+            <field1>:{<accumulator1>:<expression1>}
+            
+            
+      db.listingsAndReviews.aggregate([
+                                  { "$project": { "address": 1, "_id": 0 }},
+                                  { "$group": { "_id": "$address.country",   //这类的“_id”是我们给输出的document自定的_id
+                                                "count": { "$sum": 1 } } }   //“count”是自定的field name
+                                ])
+                                                    
+
+
+
